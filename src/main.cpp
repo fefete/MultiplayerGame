@@ -44,20 +44,16 @@ void CreateBox(b2World& World, int MouseX, int MouseY)
 int main()
 {
     
-    
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML test!");
-    
 
     b2Vec2 Gravity(0.f, 9.8f);
-
     World::getWorld()->worldInit(Gravity);
     
     sf::Texture ground_t;
     sf::Texture box_t;
-    if(!ground_t.loadFromFile("/Users/s6098981/Desktop/MAC PROJECT/base/assets/images/ground.png")){
+    if(!ground_t.loadFromFile("")){
         return EXIT_FAILURE;
     }
-    if(!box_t.loadFromFile("/Users/s6098981/Desktop/MAC PROJECT/base/assets/images/box.png")){
+    if(!box_t.loadFromFile("")){
         return EXIT_FAILURE;
     }
     
