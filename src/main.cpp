@@ -1,24 +1,12 @@
 //
-//  main.cpp
-//  t01
 //
-//  Created by Cordry, Julien on 30/09/2016.
-//  Copyright © 2016 Cordry, Julien. All rights reserved.
 //
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include "PlayerCharacter.h"
-
-#define SCALE 30.0f
-
-struct object{
-    
-    sf::Sprite sp;
-    sf::Transform tf;
-    
-};
+#include "world.h"
 
 void createGround(b2World& world, float x, float y){
     
@@ -59,9 +47,10 @@ int main()
     
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML test!");
     
-    
+
     b2Vec2 Gravity(0.f, 9.8f);
-    b2World world (Gravity);
+
+    World::getWorld()->worldInit(Gravity);
     
     sf::Texture ground_t;
     sf::Texture box_t;
@@ -72,75 +61,119 @@ int main()
         return EXIT_FAILURE;
     }
     
+    PlayerCharacter* p1 = new PlayerCharacter();
+    PlayerCharacter* p2 = new PlayerCharacter();
 
-    
-    PlayerCharacter pl;
-    
-    vec2D v;
-    v.x = 400;
-    v.y = 300;
-    vec2D v2;
-    v2.x = 16;
-    v2.y = 16;
-    
-    pl.init(v, v2 , box_t, world);
-    createGround(world, 400, 500);
-    
-    
-    while (window.isOpen())
-    {
-        sf::Event event;
-        
-        //input
-        
-        if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            
-            int coord_x = sf::Mouse::getPosition().x;
-            int coord_y = sf::Mouse::getPosition().y;
-            
-            CreateBox(world, coord_x, coord_y);
-            
-        }
-        
-        //update
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-        world.Step(1/60.0f, 8, 3);
-        window.clear(sf::Color::White);
-        // :)
-        
-        for (b2Body* bodyIterator = world.GetBodyList(); bodyIterator != 0; bodyIterator = bodyIterator->GetNext()){
-            if (bodyIterator->GetType() == b2_dynamicBody)
-            {
 
-                pl.readInput();
-                pl.update();
-                pl.draw(bodyIterator);
-                printf("PY: %f , %f \n", bodyIterator->GetPosition().x, bodyIterator->GetPosition().y);
-                window.draw(pl.sprite_);
+    vec2D pos;
+    pos.x = 400;
+    pos.y = 300;
+    vec2D size;
+    size.x = 16;
+    size.y = 16;
+    p1->init(pos, size, box_t);
 
-                
-            }
-            else
-            {
-                sf::Sprite GroundSprite;
-                GroundSprite.setTexture(ground_t);
-                GroundSprite.setOrigin(400.f, 8.f);
-                GroundSprite.setPosition(bodyIterator->GetPosition().x * SCALE, bodyIterator->GetPosition().y * SCALE);
-                GroundSprite.setRotation(180/b2_pi * bodyIterator->GetAngle());
-                window.draw(GroundSprite);
-            }
-            
-        }
-        //draw
-        
-        //window.draw();
-        window.display();
-    }
+    pos.x = 350;
     
+    p2->init(pos, size, box_t);
+
+    //deltatime
+    sf::Clock clock;
+
+    bool game_runing = true;
+
+    float t = 0.0f;
+    float dt = 1 / 30; //FIXED TIME STEP
+    float current_time = clock.getElapsedTime().asSeconds();
+
+    while (game_runing) {
+    
+      float new_time = clock.getElapsedTime().asSeconds();
+      float frame_time = new_time - current_time;
+      current_time = new_time;
+
+      World::getWorld()->wordReadInput();
+
+      while (frame_time > 0){
+      
+        float delta_time =(float)fmin(frame_time, dt);
+        World::getWorld()->worldUpdate(delta_time);
+        frame_time -= delta_time;
+        t += delta_time;
+
+      }
+    
+      World::getWorld()->worldDraw();
+
+    }// :D
+
     return 0;
 }
+
+
+/*PlayerCharacter pl;
+
+vec2D v;
+v.x = 400;
+v.y = 300;
+vec2D v2;
+v2.x = 16;
+v2.y = 16;
+
+pl.init(v, v2 , box_t, world);
+createGround(world, 400, 500);
+
+while (window.isOpen())
+{
+sf::Event event;
+
+//input
+
+if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+{
+
+int coord_x = sf::Mouse::getPosition().x;
+int coord_y = sf::Mouse::getPosition().y;
+
+CreateBox(world, coord_x, coord_y);
+
+}
+
+//update
+while (window.pollEvent(event))
+{
+if (event.type == sf::Event::Closed)
+window.close();
+}
+world.Step(1/60.0f, 8, 3);
+window.clear(sf::Color::White);
+// :)
+
+for (b2Body* bodyIterator = world.GetBodyList(); bodyIterator != 0; bodyIterator = bodyIterator->GetNext()){
+if (bodyIterator->GetType() == b2_dynamicBody)
+{
+
+pl.readInput();
+pl.update();
+pl.draw(bodyIterator);
+printf("PY: %f , %f \n", bodyIterator->GetPosition().x, bodyIterator->GetPosition().y);
+window.draw(pl.sprite_);
+
+
+}
+else
+{
+sf::Sprite GroundSprite;
+GroundSprite.setTexture(ground_t);
+GroundSprite.setOrigin(400.f, 8.f);
+GroundSprite.setPosition(bodyIterator->GetPosition().x * SCALE, bodyIterator->GetPosition().y * SCALE);
+GroundSprite.setRotation(180/b2_pi * bodyIterator->GetAngle());
+window.draw(GroundSprite);
+}
+
+}
+//draw
+
+//window.draw();
+window.display();
+}*/

@@ -1,4 +1,5 @@
 #include "PlayerCharacter.h"
+#include "world.h"
 
 PlayerCharacter::PlayerCharacter()
 {
@@ -8,10 +9,10 @@ PlayerCharacter::~PlayerCharacter()
 {
 }
 
-void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture, b2World& world) {
+void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture) {
   body_def_.position = b2Vec2((position.x) / SCALE, (position.y) / SCALE);
   body_def_.type = b2_dynamicBody;
-  body_ = world.CreateBody(&body_def_);
+  body_ = World::getWorld()->getPhysicsWorld()->CreateBody(&body_def_);
 
   shape_.SetAsBox((32.f / 2) / SCALE, (32.f / 2) / SCALE);
   fixture_def.density = 1.f;
@@ -19,14 +20,13 @@ void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture, b2W
   fixture_def.shape = &shape_;
   body_->CreateFixture(&fixture_def);
 
-
   sprite_.setTexture(texture);
   sprite_.setOrigin(16, 16);
   body_->SetUserData(this);
 
 }
 
-void PlayerCharacter::update() {
+void PlayerCharacter::update(float dt) {
 
   for (int i = 0; i < movement_state_.size(); i++)
   {
@@ -51,7 +51,8 @@ void PlayerCharacter::update() {
 void PlayerCharacter::draw(b2Body* b) {
   sprite_.setPosition(SCALE * b->GetPosition().x, SCALE * b->GetPosition().y);
   sprite_.setRotation(b->GetAngle() * 180 / b2_pi);
-    printf("DR: %f , %f \n", sprite_.getPosition().x, sprite_.getPosition().y);
+
+  //printf("DR: %f , %f \n", sprite_.getPosition().x, sprite_.getPosition().y);
 }
 
 bool jump = false;

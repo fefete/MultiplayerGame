@@ -9,9 +9,9 @@ class PlayerCharacter : public Character
 public:
   PlayerCharacter();
   ~PlayerCharacter();
-  void init(vec2D position, vec2D size, sf::Texture&, b2World&);
+  void init(vec2D position, vec2D size, sf::Texture&);
   void readInput();
-  void update();
+  void update(float dt);
   void draw(b2Body*);
   void action();
 
