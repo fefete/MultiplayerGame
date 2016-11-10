@@ -13,6 +13,7 @@ void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture) {
   body_def_.position = b2Vec2((position.x) / SCALE, (position.y) / SCALE);
   body_def_.type = b2_dynamicBody;
   body_ = World::getWorld()->getPhysicsWorld()->CreateBody(&body_def_);
+  World::getWorld()->addCharacterToWorld(this);
 
   shape_.SetAsBox((32.f / 2) / SCALE, (32.f / 2) / SCALE);
   fixture_def.density = 1.f;
@@ -48,11 +49,11 @@ void PlayerCharacter::update(float dt) {
   movement_state_.clear();
 }
 
-void PlayerCharacter::draw(b2Body* b) {
-  sprite_.setPosition(SCALE * b->GetPosition().x, SCALE * b->GetPosition().y);
-  sprite_.setRotation(b->GetAngle() * 180 / b2_pi);
+void PlayerCharacter::draw() {
+  sprite_.setPosition(SCALE * body_->GetPosition().x, SCALE * body_->GetPosition().y);
+  sprite_.setRotation(body_->GetAngle() * 180 / b2_pi);
 
-  //printf("DR: %f , %f \n", sprite_.getPosition().x, sprite_.getPosition().y);
+  printf("DR: %f , %f \n", SCALE * body_->GetPosition().x, body_->GetPosition().y);
 }
 
 bool jump = false;

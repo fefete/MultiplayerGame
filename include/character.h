@@ -17,7 +17,9 @@ public:
   
 
   virtual void update(float dt) = 0;
-  virtual void draw(b2Body*) = 0;
+  virtual void draw() = 0;
+  virtual void readInput() = 0;
+
 
 protected:
 };

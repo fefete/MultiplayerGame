@@ -12,7 +12,7 @@ public:
   void init(vec2D position, vec2D size, sf::Texture&);
   void readInput();
   void update(float dt);
-  void draw(b2Body*);
+  void draw();
   void action();
 
 

@@ -26,7 +26,8 @@ public:
   void worldUpdate(float dt);
   void worldDraw();
   void wordReadInput();
-  void addCharacterToWorld(PlayerCharacter* character);
+  void worldPollEvents();
+  void addCharacterToWorld(Character* character);
   void deleteCharacterFromWorld();
   sf::RenderWindow* getWindow();
   b2World* getPhysicsWorld();
@@ -36,7 +37,7 @@ private:
   World();
   ~World();
 
-  std::vector<PlayerCharacter*> m_characters_in_world;
+  std::vector<Character*> m_characters_in_world;
   BallCharacter* m_ball_;
   b2World* m_physics_world_;
   

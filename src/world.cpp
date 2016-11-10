@@ -13,7 +13,9 @@ World::~World()
 void World::worldInit(b2Vec2 gravity)
 {
   m_window_ = new sf::RenderWindow(sf::VideoMode(800, 600), "SFML test!");
+  m_window_->setFramerateLimit(30);
   m_physics_world_ = new b2World(gravity);
+
 }
 
 void World::wordReadInput()
@@ -23,7 +25,18 @@ void World::wordReadInput()
   }
 }
 
-void World::addCharacterToWorld(PlayerCharacter * character)
+void World::worldPollEvents()
+{
+  sf::Event event;
+  while (m_window_->pollEvent(event))
+  {
+    // Close window: exit
+    if (event.type == sf::Event::Closed)
+      m_window_->close();
+  }
+}
+
+void World::addCharacterToWorld(Character * character)
 {
   m_characters_in_world.push_back(character);
 }
@@ -59,8 +72,10 @@ void World::worldUpdate(float dt)
 
 void World::worldDraw()
 {
+  m_window_->clear(sf::Color::White);
   for (int i = 0; i < m_characters_in_world.size(); i++) {
-    m_characters_in_world[i]->readInput();
+    m_characters_in_world[i]->draw();
+    m_window_->draw(m_characters_in_world[i]->sprite_);
   }
   m_window_->display();
 }
