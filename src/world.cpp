@@ -36,9 +36,12 @@ void World::worldPollEvents()
   }
 }
 
-void World::addCharacterToWorld(Character * character)
+void World::addCharacterToWorld(Entity * entity)
 {
-  m_characters_in_world.push_back(character);
+  m_entites_to_draw.push_back(entity);
+  if (dynamic_cast<Character*>(entity)) {
+    m_characters_in_world.push_back((Character*)entity);
+  }
 }
 
 void World::deleteCharacterFromWorld()
@@ -74,8 +77,8 @@ void World::worldDraw()
 {
   m_window_->clear(sf::Color::White);
   for (int i = 0; i < m_characters_in_world.size(); i++) {
-    m_characters_in_world[i]->draw();
-    m_window_->draw(m_characters_in_world[i]->sprite_);
+    m_entites_to_draw[i]->draw();
+    m_window_->draw(m_entites_to_draw[i]->sprite_);
   }
   m_window_->display();
 }

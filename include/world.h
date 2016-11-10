@@ -7,8 +7,8 @@
 
 */
 
-#include "PlayerCharacter.h"
-#include "BallCharacter.h"
+#include "Entity.h"
+#include "Character.h"
 #include <Box2D/Box2D.h>
 #include <vector>
 
@@ -27,7 +27,7 @@ public:
   void worldDraw();
   void wordReadInput();
   void worldPollEvents();
-  void addCharacterToWorld(Character* character);
+  void addCharacterToWorld(Entity* character);
   void deleteCharacterFromWorld();
   sf::RenderWindow* getWindow();
   b2World* getPhysicsWorld();
@@ -37,8 +37,9 @@ private:
   World();
   ~World();
 
-  std::vector<Character*> m_characters_in_world;
-  BallCharacter* m_ball_;
+  std::vector<Entity*> m_entites_to_draw;
+  std::vector<Character*>m_characters_in_world;
+  //BallCharacter* m_ball_;
   b2World* m_physics_world_;
   
   sf::RenderWindow* m_window_;

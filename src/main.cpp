@@ -7,6 +7,7 @@
 #include "PlayerCharacter.h"
 #include "world.h"
 #include "assets.h"
+#include "entity.h"
 
 void createGround(b2World& world, float x, float y){
     
@@ -63,6 +64,8 @@ int main()
     PlayerCharacter* p2 = new PlayerCharacter();
 
     createGround(*World::getWorld()->getPhysicsWorld(), 400, 500);
+
+
     vec2D pos;
     pos.x = 400;
     pos.y = 300;

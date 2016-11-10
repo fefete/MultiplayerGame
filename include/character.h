@@ -1,23 +1,18 @@
 #pragma once
 
-#include <Box2D/Box2D.h>
-#include <SFML/Graphics.hpp>
+#include "entity.h"
 
-class Character
+class Character : public Entity
 {
 public:
   Character();
   ~Character();
 
-  b2BodyDef body_def_;
-  b2Body* body_;
-  b2PolygonShape shape_;
-  b2FixtureDef fixture_def;
-  sf::Sprite sprite_;
+
   
 
   virtual void update(float dt) = 0;
-  virtual void draw() = 0;
+  virtual void draw();
   virtual void readInput() = 0;
 
 
