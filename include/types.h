@@ -4,6 +4,7 @@
 
 #define SCALE 30 //pass from pixels to box2D positions
 
+#define TIME_STEP 1.0f / 60.0f
 
 enum kPkayerInputState
 {
@@ -15,9 +16,11 @@ enum kPkayerInputState
 struct netPackage{
 
   int id;
-  std::vector<kPkayerInputState> input;
-  b2Velocity vel;
-  b2Position pos;
+  int32 actions[3];
+  float32 vel_x;
+  float32 vel_y;
+  float32 pos_x;
+  float32 pos_y;
 
 };
 

@@ -5,78 +5,97 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include "PlayerCharacter.h"
+#include "wall.h"
 #include "world.h"
 #include "assets.h"
 #include "entity.h"
-
-void createGround(b2World& world, float x, float y){
-    
-    
-    b2BodyDef body_def;
-    body_def.position = b2Vec2(x/SCALE, y/SCALE);
-    body_def.type = b2_staticBody;
-    b2Body* body = world.CreateBody(&body_def);
-    b2PolygonShape shape_;
-    shape_.SetAsBox((800.f/2)/SCALE, (16.f/2)/SCALE);
-    b2FixtureDef fix_def;
-    fix_def.density = 0.f;
-    fix_def.shape = &shape_;
-    body->CreateFixture(&fix_def);
-}
-
-void CreateBox(b2World& World, int MouseX, int MouseY)
-{
-    b2BodyDef BodyDef;
-    BodyDef.position = b2Vec2(MouseX/SCALE, MouseY/SCALE);
-    BodyDef.type = b2_dynamicBody;
-    b2Body* Body = World.CreateBody(&BodyDef);
-    b2PolygonShape Shape;
-    Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
-    b2FixtureDef FixtureDef;
-    FixtureDef.density = 1.f;
-    FixtureDef.friction = 0.7f;
-    FixtureDef.shape = &Shape;
-    Body->CreateFixture(&FixtureDef);
-    printf("creating box \n");
-}
 
 
 
 int main()
 {
-    
 
     b2Vec2 Gravity(0.f, 9.8f);
     World::getWorld()->worldInit(Gravity);
-    
+    //load textures
     sf::Texture ground_t;
     sf::Texture box_t;
+    sf::Texture wall_t;
     if(!ground_t.loadFromFile(ASSETS::ImagePath("ground.png"))){
         return EXIT_FAILURE;
     }
     if(!box_t.loadFromFile(ASSETS::ImagePath("box.png"))){
         return EXIT_FAILURE;
     }
-    
+    if (!wall_t.loadFromFile(ASSETS::ImagePath("wall.png"))) {
+      return EXIT_FAILURE;
+    }
+    //load fonts
+    sf::Font font;
+    if (!font.loadFromFile(ASSETS::FontPath("arial.ttf"))) {
+      return EXIT_FAILURE;
+    }
+
+    sf::Text text;
+
+    text.setFont(font);
+    text.setString("Hi");
+    text.setCharacterSize(24);
+    text.setColor(sf::Color::Red);
+
+    text.setPosition(300, 300);
+
+    //players
     sf::Sprite sprite(box_t);
 
     PlayerCharacter* p1 = new PlayerCharacter();
     PlayerCharacter* p2 = new PlayerCharacter();
 
-    createGround(*World::getWorld()->getPhysicsWorld(), 400, 500);
 
+    {
+      vec2D pos;
+      pos.x = 400;
+      pos.y = 300;
+      vec2D size;
+      size.x = 32;
+      size.y = 32;
+      p1->init(pos, size, box_t);
 
-    vec2D pos;
-    pos.x = 400;
-    pos.y = 300;
-    vec2D size;
-    size.x = 16;
-    size.y = 16;
-    p1->init(pos, size, box_t);
-
-    pos.x = 350;
+      pos.x = 350;
     
-    p2->init(pos, size, box_t);
+      p2->init(pos, size, box_t);
+    }
+    //walls
+    //createGround(*World::getWorld()->getPhysicsWorld(), 400, 500);
+    Wall* floor = new Wall();
+    {
+      vec2D pos, size;
+      pos.x = 400;
+      pos.y = 500;
+      size.x = 800;
+      size.y = 16;
+      floor->init(pos, size, ground_t);
+    }
+    Wall* w1 = new Wall();
+    {
+      vec2D pos, size;
+      pos.x = 50;
+      pos.y = 300;
+      size.x = 480;
+      size.y = 32;
+      w1->init(pos, size, wall_t);
+    }
+
+    Wall* w2 = new Wall();
+    {
+      vec2D pos, size;
+      pos.x = 750;
+      pos.y = 300;
+      size.x = 480;
+      size.y = 32;
+      w2->init(pos, size, wall_t);
+    }
+
 
     //deltatime
     sf::Clock clock;
@@ -104,9 +123,49 @@ int main()
         t += delta_time;
 
       }
+
      World::getWorld()->getPhysicsWorld()->Step(1.0f / 30.0f, 5, 5);
+
      World::getWorld()->worldDraw();
 
     }
     return 0;
 }
+
+
+
+
+
+
+/*
+void createGround(b2World& world, float x, float y){
+
+
+b2BodyDef body_def;
+body_def.position = b2Vec2(x/SCALE, y/SCALE);
+body_def.type = b2_staticBody;
+b2Body* body = world.CreateBody(&body_def);
+b2PolygonShape shape_;
+shape_.SetAsBox((800.f/2)/SCALE, (16.f/2)/SCALE);
+b2FixtureDef fix_def;
+fix_def.density = 0.f;
+fix_def.shape = &shape_;
+body->CreateFixture(&fix_def);
+}
+
+void CreateBox(b2World& World, int MouseX, int MouseY)
+{
+b2BodyDef BodyDef;
+BodyDef.position = b2Vec2(MouseX/SCALE, MouseY/SCALE);
+BodyDef.type = b2_dynamicBody;
+b2Body* Body = World.CreateBody(&BodyDef);
+b2PolygonShape Shape;
+Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
+b2FixtureDef FixtureDef;
+FixtureDef.density = 1.f;
+FixtureDef.friction = 0.7f;
+FixtureDef.shape = &Shape;
+Body->CreateFixture(&FixtureDef);
+printf("creating box \n");
+}
+*/

@@ -27,3 +27,17 @@ std::string ASSETS::SoundPath(char * sound)
   return return_path_;
 #endif
 }
+
+
+std::string ASSETS::FontPath(char * font)
+{
+#ifdef _WIN32
+  std::string return_path_ = "../../../../assets/fonts/";
+  return_path_ = return_path_ + font;
+  return return_path_;
+#elif __APPLE__
+  std::string return_path_ = "assets/fonts/";
+  return_path_ = return_path_ + font + "\0";
+  return return_path_;
+#endif
+}

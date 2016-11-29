@@ -11,13 +11,14 @@
 #include "Character.h"
 #include <Box2D/Box2D.h>
 #include <vector>
+#include "networking.h"
 
 class World
 {
 public:
-
   //gets the world if exists, if not, creates one
   static World* getWorld();
+
 
   //inits the box2d physics world with a specified gravity
   void worldInit(b2Vec2 gravity);
@@ -42,8 +43,19 @@ private:
   //BallCharacter* m_ball_;
   b2World* m_physics_world_;
   
+  //networking
+  void sendPacket();
+  void recievePacket();
+
+
   sf::RenderWindow* m_window_;
 
   static World* m_current_world;
+
+  netPackage* m_send_p;
+  netPackage* m_recieve_p;
+
+  SOCKET m_tcp;
+  SOCKET m_udp;
 };
 

@@ -15,15 +15,16 @@ void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture) {
   body_ = World::getWorld()->getPhysicsWorld()->CreateBody(&body_def_);
   World::getWorld()->addCharacterToWorld(this);
 
-  shape_.SetAsBox((32.f / 2) / SCALE, (32.f / 2) / SCALE);
+  shape_.SetAsBox((size.x / 2) / SCALE, (size.y / 2) / SCALE);
   fixture_def.density = 1.f;
   fixture_def.friction = 0.7f;
   fixture_def.shape = &shape_;
   body_->CreateFixture(&fixture_def);
 
   sprite_.setTexture(texture);
-  sprite_.setOrigin(16, 16);
+  sprite_.setOrigin(size.x /2, size.y /2);
   body_->SetUserData(this);
+
 
 }
 
@@ -53,7 +54,7 @@ void PlayerCharacter::draw() {
   sprite_.setPosition(SCALE * body_->GetPosition().x, SCALE * body_->GetPosition().y);
   sprite_.setRotation(body_->GetAngle() * 180 / b2_pi);
 
-  printf("DR: %f , %f \n", SCALE * body_->GetPosition().x, body_->GetPosition().y);
+  //printf("DR: %f , %f \n", SCALE * body_->GetPosition().x, body_->GetPosition().y);
 }
 
 bool jump = false;
