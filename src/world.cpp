@@ -245,6 +245,7 @@ void World::worldSync()
     std::boolalpha << localPlayer->input_left << ":" <<
     std::boolalpha << localPlayer->input_jump << ":" <<
     std::boolalpha << localPlayer->input_dash << ":" <<
+    std::boolalpha << localPlayer->can_jump << ":" <<
     localPlayer->body_->GetPosition().x << ":" <<
     localPlayer->body_->GetPosition().y << ":" <<
     std::endl;
@@ -263,7 +264,6 @@ void World::worldSync()
           if (m_characters_in_world[b]->name == server_status[i]) {
             aux = m_characters_in_world[b];
             if (aux) {
-              printf("%s \n", server_status[i + 1].c_str());
               aux->movement_state_.clear();
               if (server_status[i + 1] == "True") {
                 aux->movement_state_.push_back(kPlayerInputState_right);
@@ -276,6 +276,12 @@ void World::worldSync()
               }
               if (server_status[i + 4] == "True") {
                 aux->movement_state_.push_back(kPlayerInputState_dash);
+              }
+              if (server_status[i + 5] == "True") {
+                aux->can_jump = true;
+              }
+              else {
+                aux->can_jump = false;
               }
             }
             break;
