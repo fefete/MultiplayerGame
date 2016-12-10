@@ -3,9 +3,10 @@
 #include "character.h"
 #include "types.h"
 #include <vector>
-
-class PlayerCharacter : public Character
+class World;
+class PlayerCharacter : public Entity
 {
+  friend World;
 public:
   PlayerCharacter();
   ~PlayerCharacter();
@@ -13,10 +14,25 @@ public:
   void readInput();
   void update(float dt);
   void draw();
-  void action();
+  void throwBall();
+  void dash();
 
+  void beginContact(Entity* contacted);
+  void exitContact(Entity* contacted);
 
-private:
-  std::vector<kPkayerInputState> movement_state_;
+  bool can_jump;
+  bool has_ball;
+
+  float dash_cd;
+
+  bool input_right;
+  bool input_left;
+  bool input_jump;
+  bool input_dash;
+
+  int id;
+protected:
+  std::vector<kPlayerInputState> movement_state_;
+
 };
 

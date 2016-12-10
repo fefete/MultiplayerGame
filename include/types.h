@@ -6,27 +6,43 @@
 
 #define TIME_STEP 1.0f / 60.0f
 
-enum kPkayerInputState
+#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 600
+
+
+enum kPlayerInputState
 {
-  kPkayerInputState_right = 0,
-  kPkayerInputState_left,
-  kPkayerInputState_jump,
+  kPlayerInputState_right = 0,
+  kPlayerInputState_left,
+  kPlayerInputState_jump,
+  kPlayerInputState_dash,
+  kPlayerInputState_throw,
 };
 
-struct netPackage{
+struct netUDPPackage {
 
-  int id;
-  int32 actions[3];
-  float32 vel_x;
-  float32 vel_y;
-  float32 pos_x;
-  float32 pos_y;
+  std::string system_message;
 
 };
+
+struct netTCPPackage {
+
+  std::string system_message;
+
+};
+
+
 
 struct vec2D {
 
   float x;
   float y;
 
+};
+
+enum kEntityType
+{
+  kEntityType_player = 0,
+  kEntityType_ball,
+  kEntityType_wall,
 };

@@ -9,163 +9,137 @@
 #include "world.h"
 #include "assets.h"
 #include "entity.h"
+#include <iostream>
 
+void logingLoop() {
 
+}
+void gameLoop() {
+
+}
 
 int main()
 {
 
-    b2Vec2 Gravity(0.f, 9.8f);
-    World::getWorld()->worldInit(Gravity);
-    //load textures
-    sf::Texture ground_t;
-    sf::Texture box_t;
-    sf::Texture wall_t;
-    if(!ground_t.loadFromFile(ASSETS::ImagePath("ground.png"))){
-        return EXIT_FAILURE;
-    }
-    if(!box_t.loadFromFile(ASSETS::ImagePath("box.png"))){
-        return EXIT_FAILURE;
-    }
-    if (!wall_t.loadFromFile(ASSETS::ImagePath("wall.png"))) {
-      return EXIT_FAILURE;
-    }
-    //load fonts
-    sf::Font font;
-    if (!font.loadFromFile(ASSETS::FontPath("arial.ttf"))) {
-      return EXIT_FAILURE;
-    }
+  b2Vec2 Gravity(0.f, 9.8f);
+  World::getWorld()->worldInit(Gravity);
 
-    sf::Text text;
+  //players
+  //sf::Sprite sprite(box_t);
 
-    text.setFont(font);
-    text.setString("Hi");
-    text.setCharacterSize(24);
-    text.setColor(sf::Color::Red);
+  PlayerCharacter* p1 = new PlayerCharacter();
+  {
+    vec2D pos;
+    pos.x = 400;
+    pos.y = 300;
+    vec2D size;
+    size.x = 32;
+    size.y = 32;
+    p1->init(pos, size, *World::getWorld()->playerTexture());
+    World::getWorld()->localPlayer = p1;
+    pos.x = 350;
+  }
 
-    text.setPosition(300, 300);
+  //walls
+  //createGround(*World::getWorld()->getPhysicsWorld(), 400, 500);
+  Wall* floor = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = 400;
+    pos.y = 600;
+    size.x = 1920;
+    size.y = 128;
+    floor->init(pos, size, *World::getWorld()->groundTexture());
+  }
 
-    //players
-    sf::Sprite sprite(box_t);
+  Wall* cellar = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = 400;
+    pos.y = 0;
+    size.x = 1920;
+    size.y = 128;
+    cellar->init(pos, size, *World::getWorld()->groundTexture());
+  }
+  Wall* w1 = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = 50;
+    pos.y = 300;
+    size.x = 480;
+    size.y = 32;
+    w1->init(pos, size, *World::getWorld()->wallTexture());
+  }
 
-    PlayerCharacter* p1 = new PlayerCharacter();
-    PlayerCharacter* p2 = new PlayerCharacter();
+  Wall* w2 = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = 750;
+    pos.y = 300;
+    size.x = 480;
+    size.y = 32;
+    w2->init(pos, size, *World::getWorld()->wallTexture());
+  }
 
+  Wall* w3 = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = 0;
+    pos.y = WINDOW_HEIGHT / 2;
+    size.x = 128;
+    size.y = 1920;
+    w3->init(pos, size, *World::getWorld()->sideWallTexture());
+  }
 
-    {
-      vec2D pos;
-      pos.x = 400;
-      pos.y = 300;
-      vec2D size;
-      size.x = 32;
-      size.y = 32;
-      p1->init(pos, size, box_t);
+  Wall* w4 = new Wall();
+  {
+    vec2D pos, size;
+    pos.x = WINDOW_WIDTH + 170;
+    pos.y = WINDOW_HEIGHT / 2;
+    size.x = 128;
+    size.y = 1920;
+    w4->init(pos, size, *World::getWorld()->sideWallTexture());
+  }
 
-      pos.x = 350;
-    
-      p2->init(pos, size, box_t);
-    }
-    //walls
-    //createGround(*World::getWorld()->getPhysicsWorld(), 400, 500);
-    Wall* floor = new Wall();
-    {
-      vec2D pos, size;
-      pos.x = 400;
-      pos.y = 500;
-      size.x = 800;
-      size.y = 16;
-      floor->init(pos, size, ground_t);
-    }
-    Wall* w1 = new Wall();
-    {
-      vec2D pos, size;
-      pos.x = 50;
-      pos.y = 300;
-      size.x = 480;
-      size.y = 32;
-      w1->init(pos, size, wall_t);
-    }
+  //deltatime
+  sf::Clock clock;
+  sf::Clock clock_imgui;
 
-    Wall* w2 = new Wall();
-    {
-      vec2D pos, size;
-      pos.x = 750;
-      pos.y = 300;
-      size.x = 480;
-      size.y = 32;
-      w2->init(pos, size, wall_t);
-    }
+  bool game_runing = true;
 
+  double t = 0.0f;
+  double dt = 1.0f / 30.0f; //FIXED TIME STEP
+  double current_time = (double)clock.getElapsedTime().asSeconds();
+  while (game_runing && World::getWorld()->getWindow()->isOpen()) {
 
-    //deltatime
-    sf::Clock clock;
+    ImGui::SFML::Update(*World::getWorld()->getWindow(), clock_imgui.restart());
 
-    bool game_runing = true;
-
-    double t = 0.0f;
-    double dt = 1.0f/30.0f; //FIXED TIME STEP
-    double current_time = (double)clock.getElapsedTime().asSeconds();
-
-    while (game_runing && World::getWorld()->getWindow()->isOpen()) {
-
-      double new_time = (double)clock.getElapsedTime().asSeconds();
-      double frame_time = (new_time - current_time);
-      current_time = new_time;
-
-      World::getWorld()->worldPollEvents();
+    double new_time = (double)clock.getElapsedTime().asSeconds();
+    double frame_time = (new_time - current_time);
+    current_time = new_time;
+    float time_elapsed = 0.0f;
+    World::getWorld()->worldPollEvents();
+    if (World::getWorld()->logged_in) {
       World::getWorld()->wordReadInput();
-
+      float delta_time;
       while (frame_time > 0) {
-
-        float delta_time = (float)fmin(frame_time, dt);
+        delta_time = (float)fmin(frame_time, dt);
         World::getWorld()->worldUpdate(delta_time);
         frame_time -= delta_time;
         t += delta_time;
-
+        World::getWorld()->last_delta = delta_time;
+        World::getWorld()->worldSync();
+        time_elapsed += delta_time;
       }
-
-     World::getWorld()->getPhysicsWorld()->Step(1.0f / 30.0f, 5, 5);
-
-     World::getWorld()->worldDraw();
+      World::getWorld()->getPhysicsWorld()->Step(time_elapsed, 5, 5);
+      time_elapsed = 0.0f;
+    }
+    else {
 
     }
-    return 0;
+
+    World::getWorld()->worldDraw();
+
+  }
+  return 0;
 }
-
-
-
-
-
-
-/*
-void createGround(b2World& world, float x, float y){
-
-
-b2BodyDef body_def;
-body_def.position = b2Vec2(x/SCALE, y/SCALE);
-body_def.type = b2_staticBody;
-b2Body* body = world.CreateBody(&body_def);
-b2PolygonShape shape_;
-shape_.SetAsBox((800.f/2)/SCALE, (16.f/2)/SCALE);
-b2FixtureDef fix_def;
-fix_def.density = 0.f;
-fix_def.shape = &shape_;
-body->CreateFixture(&fix_def);
-}
-
-void CreateBox(b2World& World, int MouseX, int MouseY)
-{
-b2BodyDef BodyDef;
-BodyDef.position = b2Vec2(MouseX/SCALE, MouseY/SCALE);
-BodyDef.type = b2_dynamicBody;
-b2Body* Body = World.CreateBody(&BodyDef);
-b2PolygonShape Shape;
-Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
-b2FixtureDef FixtureDef;
-FixtureDef.density = 1.f;
-FixtureDef.friction = 0.7f;
-FixtureDef.shape = &Shape;
-Body->CreateFixture(&FixtureDef);
-printf("creating box \n");
-}
-*/

@@ -19,6 +19,9 @@ void Wall::draw()
 
 void Wall::init(vec2D position, vec2D size, sf::Texture& texture)
 {
+
+  type_ = kEntityType_wall;
+
   body_def_.position = b2Vec2((position.x) / SCALE, (position.y) / SCALE);
   body_def_.type = b2_staticBody;
   body_ = World::getWorld()->getPhysicsWorld()->CreateBody(&body_def_);
@@ -26,10 +29,13 @@ void Wall::init(vec2D position, vec2D size, sf::Texture& texture)
 
   shape_.SetAsBox((size.x / 2) / SCALE, (size.y / 2) / SCALE);
   fixture_def.density = 1.f;
+  fixture_def.friction = 0.2f;
   fixture_def.shape = &shape_;
+  body_->SetUserData(this);
   body_->CreateFixture(&fixture_def);
 
   sprite_.setTexture(texture);
   sprite_.setOrigin(size.x / 2, size.y / 2);
-  body_->SetUserData(this);
+
+
 }

@@ -11,7 +11,19 @@
 #include "Character.h"
 #include <Box2D/Box2D.h>
 #include <vector>
+#include "contactlistener.h"
 #include "networking.h"
+#include "BallCharacter.h"
+#include "PlayerCharacter.h"
+
+#include "imgui.h"
+#include "imgui-sfml.h"
+
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
+
+
 
 class World
 {
@@ -28,34 +40,78 @@ public:
   void worldDraw();
   void wordReadInput();
   void worldPollEvents();
+  void worldSync();
+  void worldDisconnect();
+  sf::Texture* playerTexture();
+  sf::Texture* wallTexture();
+  sf::Texture* groundTexture();
+  sf::Texture* ballTexture();
+  sf::Texture* sideWallTexture();
+  sf::Text fontTexture();
+
+  void worldSetSendSystemData(std::string s);
   void addCharacterToWorld(Entity* character);
   void deleteCharacterFromWorld();
+
+  double last_delta;
+
   sf::RenderWindow* getWindow();
   b2World* getPhysicsWorld();
+  Ball* getBall();
 
+  bool logged_in;
+  PlayerCharacter* localPlayer;
+  
 private:
 
   World();
   ~World();
 
   std::vector<Entity*> m_entites_to_draw;
-  std::vector<Character*>m_characters_in_world;
+  std::vector<PlayerCharacter*>m_characters_in_world;
   //BallCharacter* m_ball_;
+
   b2World* m_physics_world_;
   
   //networking
-  void sendPacket();
-  void recievePacket();
-
+  void sendTCPPacket();
+  void recieveTCPPacket();
+  void sendUDPPacket();
+  void recieveUDPPacket();
+  void feedUDPSendPackage();
 
   sf::RenderWindow* m_window_;
 
   static World* m_current_world;
 
-  netPackage* m_send_p;
-  netPackage* m_recieve_p;
+  netUDPPackage* m_send_p_ball;
+  netUDPPackage* m_send_p_player;
+  netTCPPackage* m_send_p_system;
 
-  SOCKET m_tcp;
-  SOCKET m_udp;
+  netUDPPackage* m_recieve_UDP;
+  netTCPPackage* m_recieve_TCP;
+
+
+  sf::TcpSocket m_tcp;
+  sf::UdpSocket m_udp;
+
+
+  CollisionCallback* m_cb_;
+
+  Ball* b;
+  sf::Texture ball_t;
+
+  char username[255];
+  char password[255];
+
+  //load textures
+  sf::Texture ground_t;
+  sf::Texture box_t;
+  sf::Texture wall_t;
+  sf::Texture side_wall_t;
+  sf::Text text;
+  
+  std::string id;
+
 };
 
