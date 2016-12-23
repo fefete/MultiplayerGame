@@ -60,7 +60,7 @@ void World::recieveTCPPacket() {
         }
         if (com[0] == "login") {
           if (com[1] == "OK") {
-            id = com[2];
+            id = atoi(com[2].c_str());
             logged_in = true;
             new std::thread(&World::recieveUDPPacket, this);
             new std::thread(&World::sendUDPPacket, this);
@@ -121,22 +121,7 @@ void World::recieveUDPPacket() {
 }
 
 void World::feedUDPSendPackage() {
-  while (true) {
-    if (m_send_p_player == nullptr) {
-      std::stringstream oss;
-      netUDPPackage* aux = new netUDPPackage();
-      oss << id << ":" <<
-        std::boolalpha << localPlayer->input_right << ":" <<
-        std::boolalpha << localPlayer->input_left << ":" <<
-        std::boolalpha << localPlayer->input_jump << ":" <<
-        std::boolalpha << localPlayer->input_dash << ":" <<
-        localPlayer->body_->GetPosition().x << ":" <<
-        localPlayer->body_->GetPosition().y << ":" <<
-        std::endl;
-      aux->system_message = oss.str();
-      m_send_p_player = aux;
-    }
-  }
+
 }
 
 void World::worldInit(b2Vec2 gravity)
@@ -161,7 +146,7 @@ void World::worldInit(b2Vec2 gravity)
   //connect(&m_tcp, "127.0.0.1", iNetConf::port_tcp);
 
   //m_tcp.setBlocking(false);
-  //m_udp.setBlocking(false);
+  m_udp.setBlocking(false);
 
   new std::thread(&World::recieveTCPPacket, this);
   new std::thread(&World::sendTCPPacket, this);
@@ -199,13 +184,13 @@ void World::worldInit(b2Vec2 gravity)
   text.setFont(font);
 
   //ball init
-  b = new Ball();
+  m_b = new Ball();
   {
     vec2D pos;
     float radius = 16;
     pos.x = 550;
     pos.y = 200;
-    b->init(pos, radius, ball_t);
+    m_b->init(pos, radius, ball_t);
   }
 
   /*
@@ -238,57 +223,15 @@ void World::worldPollEvents()
 
 void World::worldSync()
 {
-  std::stringstream oss;
   netUDPPackage* aux = new netUDPPackage();
-  oss << id << ":" <<
-    std::boolalpha << localPlayer->input_right << ":" <<
-    std::boolalpha << localPlayer->input_left << ":" <<
-    std::boolalpha << localPlayer->input_jump << ":" <<
-    std::boolalpha << localPlayer->input_dash << ":" <<
-    std::boolalpha << localPlayer->can_jump << ":" <<
-    localPlayer->body_->GetPosition().x << ":" <<
-    localPlayer->body_->GetPosition().y << ":" <<
-    std::endl;
-  aux->system_message = oss.str();
+  aux->name = id;
+  aux->x = localPlayer->body_->GetPosition().x;
+  aux->y = localPlayer->body_->GetPosition().y;
+  aux->v_x = localPlayer->body_->GetLinearVelocity().x;
+  aux->v_y = localPlayer->body_->GetLinearVelocity().y;
+  printf("%f, %f %f \n", aux->x, aux->y, aux->v_x);
   m_send_p_player = aux;
   if (m_recieve_UDP != nullptr) {
-
-    std::vector<std::string> server_status = split(m_recieve_UDP->system_message, ':');
-    if (server_status[0] == "update") {
-      for (int i = 1; i < server_status.size(); i += 4) {
-        if (server_status[i] == "\0") {
-          break;
-        }
-        PlayerCharacter* aux = nullptr;
-        for (int b = 0; b < m_characters_in_world.size(); b++) {
-          if (m_characters_in_world[b]->name == server_status[i]) {
-            aux = m_characters_in_world[b];
-            if (aux) {
-              aux->movement_state_.clear();
-              if (server_status[i + 1] == "True") {
-                aux->movement_state_.push_back(kPlayerInputState_right);
-              }
-              if (server_status[i + 2] == "True") {
-                aux->movement_state_.push_back(kPlayerInputState_left);
-              }
-              if (server_status[i + 3] == "True") {
-                aux->movement_state_.push_back(kPlayerInputState_jump);
-              }
-              if (server_status[i + 4] == "True") {
-                aux->movement_state_.push_back(kPlayerInputState_dash);
-              }
-              if (server_status[i + 5] == "True") {
-                aux->can_jump = true;
-              }
-              else {
-                aux->can_jump = false;
-              }
-            }
-            break;
-          }
-        }
-      }
-    }
     delete m_recieve_UDP;
     m_recieve_UDP = nullptr;
   }
@@ -461,6 +404,10 @@ void World::worldDraw()
       else {
       }
     }
+
+    if (ImGui::Button("GO OFFLINE")) {
+      logged_in = true;
+    }
     ImGui::PopStyleColor(3);
     ImGui::End(); // end window
     //ImGui::ShowTestWindow();
@@ -471,5 +418,5 @@ void World::worldDraw()
 }
 
 Ball* World::getBall() {
-  return b;
+  return m_b;
 }

@@ -98,7 +98,7 @@ private:
 
   CollisionCallback* m_cb_;
 
-  Ball* b;
+  Ball* m_b;
   sf::Texture ball_t;
 
   char username[255];
@@ -111,7 +111,7 @@ private:
   sf::Texture side_wall_t;
   sf::Text text;
   
-  std::string id;
+  int id;
 
 };
 

@@ -24,11 +24,13 @@ public:
   bool has_ball;
 
   float dash_cd;
+  float time_dashing;
 
   bool input_right;
   bool input_left;
   bool input_jump;
   bool input_dash;
+
 
   int id;
 protected:

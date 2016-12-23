@@ -14,20 +14,25 @@ enum kPlayerInputState
 {
   kPlayerInputState_right = 0,
   kPlayerInputState_left,
-  kPlayerInputState_jump,
+  kPlayerInputState_up,
+  kPlayerInputState_down,
   kPlayerInputState_dash,
-  kPlayerInputState_throw,
 };
 
 struct netUDPPackage {
 
-  std::string system_message;
-
+  //std::string system_message;
+  int name;
+  double x;
+  double y;
+  double v_x;
+  double v_y;
 };
 
 struct netTCPPackage {
 
   std::string system_message;
+
 
 };
 

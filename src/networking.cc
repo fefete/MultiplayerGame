@@ -1,5 +1,5 @@
 #include "networking.h"
-
+#include <fstream>
 
 
 int connect(sf::TcpSocket* socket, const char * server, unsigned int port)
@@ -37,7 +37,7 @@ int sendTCP(sf::TcpSocket* socket, netTCPPackage package)
 
 int sendUDP(sf::UdpSocket* socket, const char * recipient, unsigned int port, netUDPPackage package)
 {
-  if (socket->send(package.system_message.c_str(), 255, recipient, port) != sf::Socket::Done)
+  if (socket->send((void*)&package, 255, recipient, port) != sf::Socket::Done)
   {
    // printf("\nUDP SENDING ERROR\n");
     return -1;
@@ -66,19 +66,22 @@ netTCPPackage* recieveTCP(sf::TcpSocket* socket, netTCPPackage * package)
 netUDPPackage* recieveUDP(sf::UdpSocket * socket, sf::IpAddress& sender, unsigned short port)
 {
   std::size_t received;
-  char* buffer_data[255];
+  void* buffer_data[255];
   if (socket->receive(buffer_data, 255, received, sender, port) != sf::Socket::Done)
   {
     //printf("\nUDP RECIEVE ERROR\n");
     return nullptr;
   }
+
+
   netUDPPackage* l_package = new netUDPPackage();
-  char* message = (char*)buffer_data;
-  l_package->system_message = std::string(message);
-  //printf("%s\n", l_package->system_message.c_str());
+  l_package->name = (int)buffer_data[0];
+  l_package->x = reinterpret_cast<double&>(buffer_data[2]);
+  l_package->y = reinterpret_cast<double&>(buffer_data[4]);
+  l_package->v_x = reinterpret_cast<double&>(buffer_data[6]);
+  l_package->v_y = reinterpret_cast<double&>(buffer_data[8]);
   return l_package;
 }
-
 
 
 
