@@ -11,6 +11,7 @@
 #include "Character.h"
 #include <Box2D/Box2D.h>
 #include <vector>
+#include <mutex>
 #include "contactlistener.h"
 #include "networking.h"
 #include "BallCharacter.h"
@@ -42,6 +43,7 @@ public:
   void worldPollEvents();
   void worldSync();
   void worldDisconnect();
+
   sf::Texture* playerTexture();
   sf::Texture* wallTexture();
   sf::Texture* groundTexture();
@@ -49,6 +51,7 @@ public:
   sf::Texture* sideWallTexture();
   sf::Text fontTexture();
 
+  void setBall(Ball*);
   void worldSetSendSystemData(std::string s);
   void addCharacterToWorld(Entity* character);
   void deleteCharacterFromWorld();
@@ -109,9 +112,14 @@ private:
   sf::Texture box_t;
   sf::Texture wall_t;
   sf::Texture side_wall_t;
-  sf::Text text;
+  sf::Text text_score_1;
+  sf::Text text_score_2;
   
   int id;
+
+  std::mutex mutex;
+
+  sf::Font font;
 
 };
 

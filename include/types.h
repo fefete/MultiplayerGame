@@ -27,6 +27,8 @@ struct netUDPPackage {
   double y;
   double v_x;
   double v_y;
+  double dash_cd;
+  bool has_ball;
 };
 
 struct netTCPPackage {
@@ -50,4 +52,8 @@ enum kEntityType
   kEntityType_player = 0,
   kEntityType_ball,
   kEntityType_wall,
+};
+
+enum kentityCategory {
+  PLAYER = 0x0001,
 };

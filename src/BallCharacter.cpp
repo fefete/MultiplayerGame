@@ -24,7 +24,6 @@ void Ball::init(vec2D position, float radius, sf::Texture &texture)
   fixture_def.friction = 0.7f;
   fixture_def.shape = &c_shape_;
   body_->SetUserData(this);
-
   body_->CreateFixture(&fixture_def);
 
   sprite_.setTexture(texture);

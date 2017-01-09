@@ -23,7 +23,7 @@ public:
   bool can_jump;
   bool has_ball;
 
-  float dash_cd;
+  double dash_cd;
   float time_dashing;
 
   bool input_right;
@@ -31,8 +31,10 @@ public:
   bool input_jump;
   bool input_dash;
 
-
+  int score;
   int id;
+  sf::Text textScore;
+
 protected:
   std::vector<kPlayerInputState> movement_state_;
 

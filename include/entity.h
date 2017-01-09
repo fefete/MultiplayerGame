@@ -17,6 +17,8 @@ public:
   b2CircleShape c_shape_;
   b2FixtureDef fixture_def;
   sf::Sprite sprite_;
+  int m_size;
+
 
   kEntityType type_;
 

@@ -79,7 +79,7 @@ void World::recieveTCPPacket() {
             vec2D size;
             size.x = 32;
             size.y = 32;
-            p1->name = std::string(com[2]);
+            p1->id = atoi(com[2].c_str());
             p1->init(pos, size, box_t);
           }
           else {
@@ -134,6 +134,8 @@ void World::worldInit(b2Vec2 gravity)
 
   m_physics_world_ = new b2World(gravity);
 
+  m_physics_world_->SetAllowSleeping(false);
+
   logged_in = false;
 
   m_send_p_player = nullptr;
@@ -177,11 +179,20 @@ void World::worldInit(b2Vec2 gravity)
   }
 
   //load fonts
-  sf::Font font;
   if (!font.loadFromFile(ASSETS::FontPath("arial.ttf"))) {
     assert(false, "NO .TTF");
   }
-  text.setFont(font);
+  text_score_1.setFont(font);
+  text_score_2.setFont(font);
+
+  text_score_1.setStyle(sf::Text::Bold | sf::Text::Underlined);
+  text_score_2.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+  text_score_1.setColor(sf::Color::Blue);
+  text_score_2.setColor(sf::Color::Red);
+
+  text_score_1.setCharacterSize(24);
+  text_score_2.setCharacterSize(24);
 
   //ball init
   m_b = new Ball();
@@ -193,10 +204,6 @@ void World::worldInit(b2Vec2 gravity)
     m_b->init(pos, radius, ball_t);
   }
 
-  /*
-    text.setString("Hi");
-  text.setCharacterSize(24);
-  text.setColor(sf::Color::Red);*/
 
 }
 
@@ -229,33 +236,23 @@ void World::worldSync()
   aux->y = localPlayer->body_->GetPosition().y;
   aux->v_x = localPlayer->body_->GetLinearVelocity().x;
   aux->v_y = localPlayer->body_->GetLinearVelocity().y;
-  printf("%f, %f %f \n", aux->x, aux->y, aux->v_x);
+  aux->has_ball = localPlayer->has_ball;
+  aux->dash_cd = localPlayer->dash_cd;
   m_send_p_player = aux;
   if (m_recieve_UDP != nullptr) {
+
+    for (int i = 0; i < m_characters_in_world.size(); i++) {
+      if (m_characters_in_world[i]->id == m_recieve_UDP->name) {
+        b2Vec2 pos = b2Vec2(m_recieve_UDP->x, m_recieve_UDP->y);
+        m_characters_in_world[i]->body_->SetTransform(pos, 0);
+        m_characters_in_world[i]->dash_cd = m_recieve_UDP->dash_cd;
+
+      }
+    }
     delete m_recieve_UDP;
     m_recieve_UDP = nullptr;
   }
 }
-
-
-
-//printf("%s", aux->system_message.c_str());
-
-/*if (m_send_p_ball == nullptr) {
-  netPackage* p = new netPackage();
-  p->dt_ = last_delta;
-  p->id = -1;
-  p->pos_x = b->body_->GetPosition().x;
-  p->pos_y = b->body_->GetPosition().y;
-  m_send_p_ball = p;
-}
-if (m_send_p_player == nullptr) {
-  netPackage* p = new netPackage();
-  p->dt_ = last_delta;
-  p->id = m_player_char->id;
-  p->pos_x = m_player_char->body_->GetPosition().x;
-  p->pos_y = m_player_char->body_->GetPosition().y;
-  m_send_p_player = p;*/
 
 
 void World::worldDisconnect()
@@ -290,7 +287,12 @@ sf::Texture* World::sideWallTexture()
 
 sf::Text World::fontTexture()
 {
-  return text;
+  return sf::Text();
+}
+
+void World::setBall(Ball *b)
+{
+  m_b = b;
 }
 
 void World::worldSetSendSystemData(std::string s)
@@ -340,6 +342,15 @@ void World::worldUpdate(float dt)
   for (unsigned int i = 0; i < m_characters_in_world.size(); i++) {
     m_characters_in_world[i]->update(dt);
   }
+  std::string s = std::to_string(m_characters_in_world[0]->score);
+  text_score_1.setString(s);
+  if(m_characters_in_world.size() > 1){
+    std::string s2 = std::to_string(m_characters_in_world[1]->score);
+    text_score_2.setString(s2);
+  }
+  if (m_b != nullptr) {
+    m_b->update(dt);
+  }
 }
 
 
@@ -353,6 +364,11 @@ void World::worldDraw()
       }
       m_entites_to_draw[i]->draw();
       m_window_->draw(m_entites_to_draw[i]->sprite_);
+    }
+    m_window_->draw(text_score_1);
+    if (m_characters_in_world.size() > 1){
+        m_window_->draw(text_score_2);
+        text_score_2.setPosition(600, 0);
     }
   }
   else {
@@ -392,7 +408,6 @@ void World::worldDraw()
       ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.4f, 0.6f, 0.6f));
       ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0.4f, 0.7f, 0.7f));
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0.4f, 0.8f, 0.8f));
-
       c = "connected";
     }
 

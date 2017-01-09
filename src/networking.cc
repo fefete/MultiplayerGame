@@ -80,6 +80,8 @@ netUDPPackage* recieveUDP(sf::UdpSocket * socket, sf::IpAddress& sender, unsigne
   l_package->y = reinterpret_cast<double&>(buffer_data[4]);
   l_package->v_x = reinterpret_cast<double&>(buffer_data[6]);
   l_package->v_y = reinterpret_cast<double&>(buffer_data[8]);
+  l_package->dash_cd = reinterpret_cast<double&>(buffer_data[10]);
+  l_package->has_ball = (bool)(buffer_data[12]);
   return l_package;
 }
 

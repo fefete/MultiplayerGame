@@ -2,7 +2,7 @@
 #include "world.h"
 
 #define DASH_CD_TIME 5.0f
-#define TIME_DASHING 2.5f
+#define TIME_DASHING 0.5f
 
 PlayerCharacter::PlayerCharacter()
 {
@@ -14,12 +14,16 @@ PlayerCharacter::~PlayerCharacter()
 
 void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture) {
 
+  //BODY
   type_ = kEntityType_player;
 
   body_def_.position = b2Vec2((position.x) / SCALE, (position.y) / SCALE);
-  body_def_.type = b2_kinematicBody;
+  body_def_.type = b2_dynamicBody;
   body_ = World::getWorld()->getPhysicsWorld()->CreateBody(&body_def_);
+  body_->SetFixedRotation(true);
+  body_->SetGravityScale(0);
   World::getWorld()->addCharacterToWorld(this);
+  m_size = size.x;
 
   shape_.SetAsBox((size.x / 2) / SCALE, (size.y / 2) / SCALE);
   fixture_def.density = 1.f;
@@ -34,6 +38,7 @@ void PlayerCharacter::init(vec2D position, vec2D size, sf::Texture& texture) {
   can_jump = true;
   has_ball = false;
   dash_cd = 0.0f;
+  score = 0.0f;
 }
 
 void PlayerCharacter::update(float dt) {
@@ -44,50 +49,48 @@ void PlayerCharacter::update(float dt) {
     switch (movement_state_[i])
     {
     case kPlayerInputState_right:
-      //body_->ApplyForce(b2Vec2(5, 0), body_->GetWorldCenter(), true);
       speedx = 10;
       break;
     case kPlayerInputState_left:
-      //body_->ApplyForce(b2Vec2(-5, 0), body_->GetWorldCenter(), true);
       speedx = -10;
       break;
     case kPlayerInputState_up:
-      //body_->ApplyLinearImpulse(b2Vec2(0, -15), body_->GetWorldCenter(), true);
       speedy = -10;
       break;
     case kPlayerInputState_down:
-      //dash();
       speedy = 10;
       break;
     case kPlayerInputState_dash:
-      speedx *= 4;
-      speedy *= 4;
+      time_dashing = TIME_DASHING;
+      dash_cd = DASH_CD_TIME;
       break;
     default:
       break;
     }
   }
-  body_->SetLinearVelocity(b2Vec2(speedx, speedy));
+
+  if (has_ball) {
+    score += 1;
+  }
 
   if (this == World::getWorld()->localPlayer) {
     movement_state_.clear();
-    if (has_ball) {
-      printf("has ball");
-    }
   }
-  if (dash_cd > 0) {
+  if (dash_cd > 0 && !has_ball) {
     dash_cd -= dt;
   }
   if (time_dashing > 0) {
     time_dashing -= dt;
+    speedx *= 4;
+    speedy *= 4;
   }
+  body_->SetLinearVelocity(b2Vec2(speedx, speedy));
+  body_->SetTransform(body_->GetPosition(), 0);
 }
 
 void PlayerCharacter::draw() {
   sprite_.setPosition(SCALE * body_->GetPosition().x, SCALE * body_->GetPosition().y);
   sprite_.setRotation(body_->GetAngle() * 180 / b2_pi);
-
-  //printf("DR: %f , %f \n", SCALE * body_->GetPosition().x, body_->GetPosition().y);
 }
 
 
@@ -127,55 +130,38 @@ void PlayerCharacter::readInput() {
       input_dash = true;
       return;
     }
-    if (has_ball) {
-      //movement_state_.push_back(kPlayerInputState_throw);
-      return;
-    }
   }
 }
 
 
 
 void PlayerCharacter::throwBall() {
-  World::getWorld()->getBall()->drawableObjectState(true);
-  b2Vec2 ball_new_pos;
-  b2Vec2 velocity = body_->GetLinearVelocity();
-  velocity.Normalize();
-  ball_new_pos.x = velocity.x * 5 + body_->GetPosition().x;
-  ball_new_pos.y = velocity.y * 5 + body_->GetPosition().y;
-  World::getWorld()->getBall()->body_->SetTransform(ball_new_pos, body_->GetAngle());
-  World::getWorld()->getBall()->body_->ApplyForce(b2Vec2(ball_new_pos.x * 10, ball_new_pos.y * 10),
-    World::getWorld()->getBall()->body_->GetWorldCenter(),
-    true);
-  World::getWorld()->getBall()->physicObjectState(true);
-
-  has_ball = false;
-  dash_cd = DASH_CD_TIME;
-
 }
 
 void PlayerCharacter::dash() {
-  body_->ApplyForce(b2Vec2(body_->GetLinearVelocity().x * 150, body_->GetLinearVelocity().y * 150),
-    body_->GetWorldCenter(), true);
   dash_cd = DASH_CD_TIME;
   time_dashing = TIME_DASHING;
 }
 
 void PlayerCharacter::beginContact(Entity * contacted)
 {
+  PlayerCharacter* contact;
   switch (contacted->type_) {
   case kEntityType_ball:
-    //joint
     contacted->drawableObjectState(false);
     contacted->physicObjectState(false);
     has_ball = true;
     break;
   case kEntityType_player:
     //check steal ball
-    break;
-  case kEntityType_wall:
-    //recover jump
-    can_jump = true;
+    contact = dynamic_cast<PlayerCharacter*>(contacted);
+    if (contact->has_ball && dash_cd > 0) {
+      contact->has_ball = false;
+      has_ball = true;
+    }else if (has_ball && contact->dash_cd > 0) {
+      has_ball = false;
+      contact->has_ball = true;
+    }
     break;
   default:
     break;
@@ -184,18 +170,4 @@ void PlayerCharacter::beginContact(Entity * contacted)
 
 void PlayerCharacter::exitContact(Entity * contacted)
 {
-  switch (contacted->type_) {
-  case kEntityType_ball:
-    //joint
-    break;
-  case kEntityType_player:
-    //check steal ball
-    break;
-  case kEntityType_wall:
-    //loose jump?
-    can_jump = false;
-    break;
-  default:
-    break;
-  }
 }
