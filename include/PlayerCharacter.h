@@ -38,5 +38,8 @@ public:
 protected:
   std::vector<kPlayerInputState> movement_state_;
 
+private:
+
+
 };
 

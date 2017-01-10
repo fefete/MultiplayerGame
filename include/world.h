@@ -43,6 +43,7 @@ public:
   void worldPollEvents();
   void worldSync();
   void worldDisconnect();
+  int numberOfCharactersInPlay();
 
   sf::Texture* playerTexture();
   sf::Texture* wallTexture();
@@ -110,6 +111,7 @@ private:
   //load textures
   sf::Texture ground_t;
   sf::Texture box_t;
+  sf::Texture box_t_2;
   sf::Texture wall_t;
   sf::Texture side_wall_t;
   sf::Text text_score_1;
@@ -120,6 +122,8 @@ private:
   std::mutex mutex;
 
   sf::Font font;
+
+  static bool disconnect;
 
 };
 

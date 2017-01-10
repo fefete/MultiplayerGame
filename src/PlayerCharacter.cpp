@@ -105,31 +105,35 @@ void PlayerCharacter::readInput() {
   input_left = false;
   input_right = false;
   input_dash = false;
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-    movement_state_.push_back(kPlayerInputState_up);
-    input_jump = true;
-    can_jump = false;
-  }
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-    movement_state_.push_back(kPlayerInputState_down);
-    input_jump = true;
-    can_jump = false;
-  }
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-    movement_state_.push_back(kPlayerInputState_left);
-    input_left = true;
-  }
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-    movement_state_.push_back(kPlayerInputState_right);
-    input_right = true;
-  }
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-    if (!has_ball && dash_cd <= 0) {
-      movement_state_.push_back(kPlayerInputState_dash);
-      input_dash = true;
-      return;
+  if (World::getWorld()->numberOfCharactersInPlay() > 1) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+      movement_state_.push_back(kPlayerInputState_up);
+      input_jump = true;
+      can_jump = false;
     }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+      movement_state_.push_back(kPlayerInputState_down);
+      input_jump = true;
+      can_jump = false;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+      movement_state_.push_back(kPlayerInputState_left);
+      input_left = true;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+      movement_state_.push_back(kPlayerInputState_right);
+      input_right = true;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+      if (!has_ball && dash_cd <= 0) {
+        movement_state_.push_back(kPlayerInputState_dash);
+        input_dash = true;
+        return;
+      }
+    }
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+    World::getWorld()->worldDisconnect();
   }
 }
 
@@ -158,7 +162,8 @@ void PlayerCharacter::beginContact(Entity * contacted)
     if (contact->has_ball && dash_cd > 0) {
       contact->has_ball = false;
       has_ball = true;
-    }else if (has_ball && contact->dash_cd > 0) {
+    }
+    else if (has_ball && contact->dash_cd > 0) {
       has_ball = false;
       contact->has_ball = true;
     }

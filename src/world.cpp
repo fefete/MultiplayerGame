@@ -13,6 +13,8 @@ namespace iNetConf {
 }
 
 World* World::m_current_world;
+bool World::disconnect = false;
+
 
 World::World()
 {
@@ -80,7 +82,7 @@ void World::recieveTCPPacket() {
             size.x = 32;
             size.y = 32;
             p1->id = atoi(com[2].c_str());
-            p1->init(pos, size, box_t);
+            p1->init(pos, size, box_t_2);
           }
           else {
           }
@@ -164,7 +166,9 @@ void World::worldInit(b2Vec2 gravity)
   }
   if (!box_t.loadFromFile(ASSETS::ImagePath("box.png"))) {
     assert(false, "NOT IMAGE FOR PLAYER");
-
+  }
+  if (!box_t_2.loadFromFile(ASSETS::ImagePath("box_2.png"))) {
+    assert(false, "NOT IMAGE FOR PLAYER");
   }
   if (!wall_t.loadFromFile(ASSETS::ImagePath("wall.png"))) {
     assert(false, "NOT IMAGE FOR WALL");
@@ -257,7 +261,12 @@ void World::worldSync()
 
 void World::worldDisconnect()
 {
-  m_tcp.disconnect();
+  disconnect = true;
+}
+
+int World::numberOfCharactersInPlay()
+{
+  return m_characters_in_world.size();
 }
 
 sf::Texture* World::playerTexture()
@@ -350,6 +359,11 @@ void World::worldUpdate(float dt)
   }
   if (m_b != nullptr) {
     m_b->update(dt);
+  }
+  if (disconnect) {
+    m_tcp.disconnect();
+    m_udp.unbind();
+    m_window_->close();
   }
 }
 
