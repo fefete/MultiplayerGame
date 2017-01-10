@@ -6,7 +6,7 @@
 
 
 namespace iNetConf {
-  static char* server = "127.0.0.1";
+  char server[255];
   int port_tcp = 53000;
   int port_udp = 53035;
   bool connected = false;
@@ -66,7 +66,6 @@ void World::recieveTCPPacket() {
             logged_in = true;
             new std::thread(&World::recieveUDPPacket, this);
             new std::thread(&World::sendUDPPacket, this);
-            //new std::thread(&World::feedUDPSendPackage, this);
           }
           else {
             printf("\nLOG FAILURE\n");
