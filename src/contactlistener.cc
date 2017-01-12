@@ -49,7 +49,7 @@ void CollisionCallback::EndContact(b2Contact* c) {
     return;
   }
   void* raw_B = c->GetFixtureB()->GetBody()->GetUserData();
-
+    
   Entity* B = static_cast<Entity*>(raw_B);
   if (!B) {
     return;

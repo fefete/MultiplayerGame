@@ -14,6 +14,7 @@ namespace iNetConf {
 
 World* World::m_current_world;
 bool World::disconnect = false;
+bool World::has_to_disconnect = false;
 
 
 World::World()
@@ -37,7 +38,7 @@ std::vector<std::string> split(std::string str, char delimiter) {
 }
 
 void World::sendTCPPacket() {
-  while (true) {
+  while (!disconnect) {
     if (m_send_p_system != nullptr) {
       sendTCP(&m_tcp, *m_send_p_system);
       delete m_send_p_system;
@@ -47,7 +48,7 @@ void World::sendTCPPacket() {
 }
 
 void World::recieveTCPPacket() {
-  while (true) {
+  while (!disconnect) {
     if (m_recieve_TCP == nullptr) {
       //m_recieve_TCP = new netTCPPackage();
       m_recieve_TCP = recieveTCP(&m_tcp, m_recieve_TCP);
@@ -63,6 +64,8 @@ void World::recieveTCPPacket() {
         if (com[0] == "login") {
           if (com[1] == "OK") {
             id = atoi(com[2].c_str());
+            localPlayer->id = atoi(com[2].c_str());
+            localPlayer->max_score = atoi(com[3].c_str());
             logged_in = true;
             new std::thread(&World::recieveUDPPacket, this);
             new std::thread(&World::sendUDPPacket, this);
@@ -71,6 +74,15 @@ void World::recieveTCPPacket() {
             printf("\nLOG FAILURE\n");
           }
         }
+        if (com[0] == "remove") {
+          if (com[1] == "OK") {
+            disconnect = true;
+          }
+          else {
+            printf("\nDISCONNECT FAILURE\n");
+          }
+        }
+
         if (com[0] == "game") {
           if (com[1] == "newPlayer") {
             PlayerCharacter* p1 = new PlayerCharacter();
@@ -83,7 +95,13 @@ void World::recieveTCPPacket() {
             p1->id = atoi(com[2].c_str());
             p1->init(pos, size, box_t_2);
           }
-          else {
+          else if (com[1] == "disconnection") {
+            for (int i = 0; i < m_characters_in_world.size(); i++) {
+              if (m_characters_in_world[i]->id == atoi(com[2].c_str())) {
+                m_characters_in_world[i]->drawableObjectState(false);
+                m_characters_in_world[i]->physicObjectState(false);
+              }
+            }
           }
         }
         delete m_recieve_TCP;
@@ -96,7 +114,7 @@ void World::recieveTCPPacket() {
 
 
 void World::sendUDPPacket() {
-  while (true)
+  while (!disconnect)
   {
     if (m_send_p_player != nullptr) {
       sendUDP(&m_udp, iNetConf::server, iNetConf::port_udp, *m_send_p_player);
@@ -111,7 +129,7 @@ void World::sendUDPPacket() {
   }
 }
 void World::recieveUDPPacket() {
-  while (true)
+  while (!disconnect)
   {
     if (m_recieve_UDP == nullptr) {
       //printf("REC UDP \n");
@@ -145,8 +163,6 @@ void World::worldInit(b2Vec2 gravity)
   m_recieve_TCP = nullptr;
   m_recieve_UDP = nullptr;
   localPlayer = nullptr;
-
-  //connect(&m_tcp, "127.0.0.1", iNetConf::port_tcp);
 
   //m_tcp.setBlocking(false);
   m_udp.setBlocking(false);
@@ -225,7 +241,7 @@ void World::worldPollEvents()
     ImGui::SFML::ProcessEvent(event);
     // Close window: exit
     if (event.type == sf::Event::Closed) {
-      m_window_->close();
+      //m_window_->close();
       worldDisconnect();
     }
   }
@@ -260,7 +276,7 @@ void World::worldSync()
 
 void World::worldDisconnect()
 {
-  disconnect = true;
+  has_to_disconnect = true;
 }
 
 int World::numberOfCharactersInPlay()
@@ -352,12 +368,21 @@ void World::worldUpdate(float dt)
   }
   std::string s = std::to_string(m_characters_in_world[0]->score);
   text_score_1.setString(s);
-  if(m_characters_in_world.size() > 1){
+  if (m_characters_in_world.size() > 1) {
     std::string s2 = std::to_string(m_characters_in_world[1]->score);
     text_score_2.setString(s2);
   }
   if (m_b != nullptr) {
     m_b->update(dt);
+  }
+  if (has_to_disconnect && !disconnect) {
+    std::string user = std::to_string(id);
+    std::string final_string = "disconnect:" + user + ":";
+    if (localPlayer->score > localPlayer->max_score) {
+      localPlayer->max_score = localPlayer->score;
+    }
+    final_string += std::to_string(localPlayer->max_score ) + ":";
+    World::getWorld()->worldSetSendSystemData(final_string);
   }
   if (disconnect) {
     m_tcp.disconnect();
@@ -379,9 +404,9 @@ void World::worldDraw()
       m_window_->draw(m_entites_to_draw[i]->sprite_);
     }
     m_window_->draw(text_score_1);
-    if (m_characters_in_world.size() > 1){
-        m_window_->draw(text_score_2);
-        text_score_2.setPosition(600, 0);
+    if (m_characters_in_world.size() > 1) {
+      m_window_->draw(text_score_2);
+      text_score_2.setPosition(600, 0);
     }
   }
   else {

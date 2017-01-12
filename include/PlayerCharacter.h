@@ -32,6 +32,7 @@ public:
   bool input_dash;
 
   int score;
+  int max_score;
   int id;
   sf::Text textScore;
 

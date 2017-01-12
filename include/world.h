@@ -124,6 +124,6 @@ private:
   sf::Font font;
 
   static bool disconnect;
-
+  static bool has_to_disconnect;
 };
 
