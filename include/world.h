@@ -116,7 +116,10 @@ private:
   sf::Texture side_wall_t;
   sf::Text text_score_1;
   sf::Text text_score_2;
+  sf::Text text_score_3;
   
+  float hid_max_score_time;
+
   int id;
 
   std::mutex mutex;

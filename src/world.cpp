@@ -203,15 +203,19 @@ void World::worldInit(b2Vec2 gravity)
   }
   text_score_1.setFont(font);
   text_score_2.setFont(font);
+  text_score_3.setFont(font);
 
   text_score_1.setStyle(sf::Text::Bold | sf::Text::Underlined);
   text_score_2.setStyle(sf::Text::Bold | sf::Text::Underlined);
+  text_score_3.setStyle(sf::Text::Bold | sf::Text::Underlined);
 
   text_score_1.setColor(sf::Color::Blue);
   text_score_2.setColor(sf::Color::Red);
+  text_score_3.setColor(sf::Color::Magenta);
 
   text_score_1.setCharacterSize(24);
   text_score_2.setCharacterSize(24);
+  text_score_3.setCharacterSize(24);
 
   //ball init
   m_b = new Ball();
@@ -223,6 +227,7 @@ void World::worldInit(b2Vec2 gravity)
     m_b->init(pos, radius, ball_t);
   }
 
+  hid_max_score_time = 0.0f;
 
 }
 
@@ -242,7 +247,12 @@ void World::worldPollEvents()
     // Close window: exit
     if (event.type == sf::Event::Closed) {
       //m_window_->close();
-      worldDisconnect();
+      if (logged_in) {
+        worldDisconnect();
+      }
+      else {
+        m_window_->close();
+      }
     }
   }
 }
@@ -381,7 +391,7 @@ void World::worldUpdate(float dt)
     if (localPlayer->score > localPlayer->max_score) {
       localPlayer->max_score = localPlayer->score;
     }
-    final_string += std::to_string(localPlayer->max_score ) + ":";
+    final_string += std::to_string(localPlayer->max_score) + ":";
     World::getWorld()->worldSetSendSystemData(final_string);
   }
   if (disconnect) {
@@ -404,9 +414,10 @@ void World::worldDraw()
       m_window_->draw(m_entites_to_draw[i]->sprite_);
     }
     m_window_->draw(text_score_1);
+    m_window_->draw(text_score_3);
     if (m_characters_in_world.size() > 1) {
       m_window_->draw(text_score_2);
-      text_score_2.setPosition(600, 0);
+      text_score_2.setPosition(800, 0);
     }
   }
   else {
